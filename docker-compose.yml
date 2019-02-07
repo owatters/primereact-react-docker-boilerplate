@@ -1,0 +1,36 @@
+version: '3'
+volumes:
+  node_modules:
+services:
+  api:
+    image: node
+    environment:
+      - MYSQL_DB_HOST
+      - MYSQL_DB_USER
+      - MYSQL_DB_PASSWORD
+      - MYSQL_DB_PORT
+      - MYSQL_DB
+    volumes:
+      - ./BE/api:/api
+      - node_modules:/BE/node_modules
+    command: "/bin/bash -c 'cd /api && npm start'"
+    ports: 
+      - 8080:80
+  web:
+    image: nginx:stable
+    depends_on:
+      - api
+      - webpack
+    volumes:
+      - ./FE/conf.d/nginx:/etc/nginx/conf.d
+      - ./FE/public:/usr/share/nginx/html
+    ports: 
+      - 80:80
+  webpack:
+    image: node
+    volumes:
+      - ./FE:/FE
+      - node_modules:/FE/node_modules
+    environment:
+      - NODE_PATH:~
+    command: "/bin/bash -c 'cd /FE  && npm start'"
